@@ -11,11 +11,11 @@
 
 Mục tiêu: **neo nhóm vào bối cảnh thật**. Tránh tìm case generic kiểu *"AI hallucinate"* — case đó có ở khắp nơi, không giúp ích test set track cụ thể của nhóm.
 
-1. **Sản phẩm + AI đang làm gì cụ thể?** Vd: *"Chatbot tư vấn tuyển sinh, dùng LLM trả lời câu hỏi học sinh về ngành học và học bổng."*
-2. **Ai dùng + dùng khi nào + trạng thái họ thế nào?** Vd: *"Học sinh cấp 3 + phụ huynh, dùng đêm 22:00, đang lo lắng cận deadline."*
-3. **Rủi ro NẶNG nhất là gì?** Tài chính (mất tiền) / sai quyết định nghề nghiệp / lỡ deadline lớn / sức khoẻ tinh thần / pháp lý?
-4. **Loại lỗi nào "đắt" nhất với sản phẩm?** Bịa data / trả lời quá tự tin / không escalate khi nên / leak privacy?
-5. **Bối cảnh nào CHỈ track mình có** mà benchmark global không test? Vd VN-specific: học bổng dân tộc thiểu số, áp lực gia đình, hệ thống xét tuyển 2 khối.
+1. **Sản phẩm + AI đang làm gì cụ thể?** Chatbot hỗ trợ hành khách tra cứu chính sách giá vé (Fare Rules), quy định hành lý, và quy trình hoàn/đổi vé dựa trên dữ liệu chính thức của hãng (RAG-based).
+2. **Ai dùng + dùng khi nào + trạng thái họ thế nào?** Hành khách quốc tế và nội địa, dùng khi chuyến bay bị delay/hủy hoặc vào khung giờ đêm (22h-4h) khi hotline quá tải. Trạng thái: Stress cao, vội vã cần thông tin tài chính để ra quyết định ngay.
+3. **Rủi ro NẶNG nhất là gì?** Tài chính (phải bồi thường thiệt hại do AI hứa sai chính sách hoàn tiền - tương tự vụ Air Canada) và Pháp lý (vi phạm nghĩa vụ cung cấp thông tin theo Nghị định 92/2021/NĐ-CP).
+4. **Loại lỗi nào "đắt" nhất với sản phẩm?** Hallucination (bịa đặt ngoại lệ hoàn tiền cho hạng vé Economy Super Lite) và việc AI tự ý cam kết số tiền bồi thường cụ thể thay vì hướng dẫn quy trình claim.
+5. **Bối cảnh nào CHỈ track mình có** mà benchmark global không test? Quy định vận chuyển hàng hóa đặc thù VN (nước mắm, sầu riêng); điều kiện vé mùa Tết; và xử lý phương ngữ/viết tắt của người dùng Việt ("vé tui refund đc hk?").
 
 > **Cảnh báo**: nếu nhóm trả lời câu 5 ngắn nhất, đó là dấu hiệu nhóm chưa hiểu sâu bối cảnh. **Phải fill 5 câu trước khi prompt** — không thì AI trả về case generic.
 
