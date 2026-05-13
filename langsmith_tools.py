@@ -21,6 +21,12 @@ def read_jsonl(path: Path) -> list[dict]:
 
 
 def sync_dataset(dataset_name: str, input_path: Path, config_path: Path) -> None:
+    """Sync examples to LangSmith dataset.
+
+    If example records include extra fields (tokens, cost, latency, tags,
+    metadata, metrics, etc.), this function will attempt to push them as
+    example metadata and create best-effort runs containing metrics.
+    """
     load_dotenv()
     config = load_config(config_path)
     client = Client()
@@ -46,9 +52,76 @@ def sync_dataset(dataset_name: str, input_path: Path, config_path: Path) -> None
         outputs = {}
         if config.langsmith.get("reference_key") in example:
             outputs[config.langsmith.get("reference_key")] = example[config.langsmith.get("reference_key")]
+<<<<<<< HEAD
         client.create_example(dataset_id=dataset.id, inputs=inputs, outputs=outputs)
         created += 1
 
+=======
+
+        # Collect common metadata fields if present in the input example
+        metadata = example.get("metadata", {}) or {}
+        # Copy well-known telemetry/fields into metadata when provided
+        for k in (
+            "tokens",
+            "cost",
+            "latency",
+            "dataset",
+            "annotation_queue",
+            "feedback",
+            "reference_example",
+            "error",
+            "start_time",
+            "first_token",
+        ):
+            if k in example:
+                metadata.setdefault(k, example.get(k))
+
+        tags = example.get("tags", []) or []
+
+        # Try to create an example with full fields; fall back to minimal if API doesn't accept extras
+        created_example = None
+        try:
+            created_example = client.create_example(
+                dataset_id=dataset.id,
+                inputs=inputs,
+                outputs=outputs,
+                metadata=metadata,
+                tags=tags,
+            )
+        except TypeError:
+            # Older client signatures may not accept metadata/tags kwargs
+            created_example = client.create_example(dataset_id=dataset.id, inputs=inputs, outputs=outputs)
+        except Exception as exc:
+            print(f"Warning: failed to create example with full fields: {exc}")
+            created_example = client.create_example(dataset_id=dataset.id, inputs=inputs, outputs=outputs)
+
+        created += 1
+
+        # If the example contains precomputed metrics, try to create a run capturing them
+        if isinstance(example.get("metrics"), dict):
+            metrics = example.get("metrics")
+            try:
+                # Best-effort: some clients support create_run or create_run_for_example
+                if hasattr(client, "create_run"):
+                    client.create_run(
+                        dataset_id=dataset.id,
+                        example_id=getattr(created_example, "id", None),
+                        inputs=inputs,
+                        outputs=outputs,
+                        metrics=metrics,
+                        metadata=metadata,
+                        tags=tags,
+                    )
+                elif hasattr(client, "create_run_for_example"):
+                    client.create_run_for_example(example_id=getattr(created_example, "id", None), metrics=metrics)
+                else:
+                    # last resort: attach metrics into example metadata via an update call
+                    if hasattr(client, "update_example") and getattr(created_example, "id", None):
+                        client.update_example(example_id=created_example.id, metadata={**metadata, "metrics": metrics})
+            except Exception as exc:
+                print(f"Warning: failed to push metrics/run to LangSmith for question '{question}': {exc}")
+
+>>>>>>> 79b1e96bab6c988e8c711f6d3271d2bfd38ebee5
     print(f"Synced {created} new examples to LangSmith dataset: {dataset_name}")
 
 
