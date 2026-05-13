@@ -4,24 +4,24 @@ bai-tap: 2 — Thiết kế giải pháp
 demo: ./demo.md
 ---
 
-# card.md — Lớp giao diện: Cảnh báo trạng thái xác minh & Lối thoát khẩn cấp
+# card.md — Lớp giao diện (Cảnh báo Nguồn & Nút Khẩn cấp)
 
-**Tình huống xử lý**: L1-C1 (AI bịa chính sách hoàn vé ngoại lệ cho hạng vé siêu tiết kiệm dưới áp lực tang chế)  
-Xem chi tiết trong bộ kiểm thử tại `../../01-test-set-review/1-diverge.md`.
+**Tình huống xử lý**: L1-C1 đến L5-C3 (Đặc biệt tập trung vào L1-C1 Bịa đặt chính sách hoàn vé và L1-C2 Cấp cứu y tế).
+Xem `../../1-map-and-format.md` Phần A và kết quả đánh giá tại `EVAL_RESULTS_FALLBACK.md`.
 
 ---
 
 ## 1. Giải pháp là gì?
 
-Giao diện người dùng (UI) tích hợp cơ chế hiển thị trực quan các cấp độ tin cậy của thông tin chính sách vé và bồi thường tài chính. Cụ thể, hệ thống tự động gắn nhãn trạng thái xác minh (Đã kiểm chứng từ Ma trận điều kiện vé / Cảnh báo dữ liệu có thể cũ / Chưa có thông tin xác minh). Đồng thời, khi nhận diện các truy vấn nhạy cảm về hoàn tiền hoặc khẩn cấp, UI hiển thị ngay lập tức lối thoát khẩn cấp (nút chuyển thẳng sang nhân viên CSKH hoặc gọi đường dây nóng) để ngăn chặn người dùng bị neo vào thông tin ảo giác của AI.
+Giao diện tích hợp hệ thống nhãn xác thực động dựa trên điểm tin cậy (Confidence Score) và trích xuất nguyên văn liên kết nguồn (Citations) từ bảng Fare Rules/Nghị định 92. Khi phát hiện các từ khóa nhạy cảm về y tế hoặc khi bot từ chối do thiếu nguồn tin cậy, màn hình lập tức hiển thị dải băng cảnh báo màu đỏ kèm nút bấm gọi nhanh "Kết nối Quầy CSKH / Đội Y tế Sân bay" trong vòng 1 giây.
 
 ---
 
 ## 2. Vì sao sửa ở lớp giao diện?
 
-- **Ngăn chặn niềm tin mù quáng**: Người dùng trong trạng thái căng thẳng hoặc vội vã thường có xu hướng tin tưởng tuyệt đối vào câu trả lời mượt mà của LLM.
-- **Điểm chạm cuối cùng (Defense in Depth)**: Ngay cả khi dữ liệu RAG bị truy xuất sai hoặc Prompt bị vượt rào (jailbreak), lớp giao diện đóng vai trò là chốt chặn thị giác cuối cùng cảnh báo rủi ro cho hành khách.
-- **Trực quan hóa nguồn gốc**: Bắt buộc người dùng nhận thức được thông tin nào đến từ quy định chính thức của hãng bay, thông tin nào nằm ngoài khả năng tự quyết của hệ thống.
+- Người dùng đang chịu áp lực cao (trễ chuyến, tang chế, thai sản) dễ tin câu trả lời của AI quá mức hoặc hoảng loạn nếu bot trả lời vòng vo.
+- Kết quả `EVAL_RESULTS_FALLBACK.md` cho thấy **Faithfulness thấp (0.218)** dù **Context Precision cao (0.881)**, nghĩa là AI lấy đúng tài liệu nhưng diễn đạt dễ gây hiểu lầm. Giao diện buộc phải hiển thị link trích dẫn gốc để hành khách tự đối chiếu.
+- Giao diện là lớp chặn cuối cùng trực quan nhất để điều hướng người dùng sang luồng hỗ trợ con người (Human-in-the-loop) khi hệ thống sinh ngữ cảnh rủi ro.
 
 **Hành động phòng vệ chính**:
 
@@ -38,15 +38,17 @@ Giao diện người dùng (UI) tích hợp cơ chế hiển thị trực quan c
 
 **Định dạng demo**:
 
-- [x] Phác thảo màn hình (ASCII Layouts)
-- [x] Luồng màn hình cho các trạng thái (Default, Uncertain, No-Data, Escalation)
+- [x] Phác thảo màn hình (ASCII UI Sketch)
+- [x] Luồng màn hình
+- [ ] Bản HTML đơn giản
+- [ ] Ảnh hoặc link prototype
 
 **Thành phần cần có trong demo**:
 
-- Trạng thái thông tin có nguồn gốc rõ ràng (Verified Badge).
-- Trạng thái thông tin mang tính tham khảo/không chắc chắn (Warning Badge).
-- Cơ chế chuyển sang người thật (Action buttons nổi bật).
-- Câu chữ cảnh báo ngắn gọn, thuần Việt, thấu cảm.
+- Trạng thái có nguồn xác minh (Verified Badge + Hyperlinks)
+- Trạng thái chưa có nguồn/Low Confidence (Warning Badge)
+- Cách người dùng chuyển sang người thật (Emergency Escalation Button)
+- Câu chữ cảnh báo ngắn, dễ hiểu, thấu cảm
 
 ---
 
@@ -54,13 +56,11 @@ Giao diện người dùng (UI) tích hợp cơ chế hiển thị trực quan c
 
 **Có thể gây vấn đề gì?**
 
-- Giao diện có thể trở nên chật chội, gia tăng tải nhận thức (cognitive load) cho người dùng khi xuất hiện quá nhiều nhãn cảnh báo hoặc nút bấm phụ.
-- Khách hàng cảm thấy phiền phức hoặc lo lắng thái quá trước các thông báo từ chối.
+Màn hình hiển thị quá nhiều liên kết trích dẫn và nhãn dán có thể khiến giao diện chat trên điện thoại trở nên chật chội, làm người dùng lười đọc hoặc cảm thấy hệ thống thiếu thân thiện.
 
 **Nhóm giảm vấn đề đó bằng cách nào?**
 
-- Áp dụng nguyên tắc **Hiển thị ngữ cảnh có điều kiện**: Chỉ kích hoạt các nhãn cảnh báo nổi bật đối với các luồng câu hỏi rủi ro cao (hoàn tiền, đổi vé, cấp cứu y tế).
-- Thiết kế tối giản: Sử dụng các icon trực quan kết hợp màu sắc tinh tế (Xanh lá cho Verified, Vàng cam cho Cảnh báo, Đỏ nhạt cho Chuyển tiếp khẩn cấp) thay vì các khối văn bản dài dòng.
+Chỉ hiển thị nhãn cảnh báo nổi bật đối với các câu hỏi nhạy cảm liên quan đến tài chính (hoàn tiền, phí đổi) và an ninh/y tế. Các liên kết trích dẫn được gộp gọn dưới dạng chú thích dạng số `[1]`, `[2]` có thể bấm để mở rộng (Accordion view).
 
 ---
 
@@ -72,4 +72,4 @@ Giao diện người dùng (UI) tích hợp cơ chế hiển thị trực quan c
 - [x] Có cách chuyển sang người thật khi AI không nên tự xử lý.
 - [x] Câu chữ trong giao diện ngắn, không đổ hết trách nhiệm cho người dùng.
 
-**Người phụ trách**: Nhóm giải pháp UI/UX Hàng không
+**Người phụ trách**: Nhóm giải pháp CSKH Hàng không

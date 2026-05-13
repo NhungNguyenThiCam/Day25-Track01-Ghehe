@@ -4,24 +4,24 @@ bai-tap: 2 — Thiết kế giải pháp
 demo: ./demo.md
 ---
 
-# card.md — Lớp chỉ dẫn AI: Bộ ranh giới an toàn & Kỹ thuật trích dẫn
+# card.md — Lớp chỉ dẫn AI (System Prompt & Guardrails)
 
-**Tình huống xử lý**: L1-C1 (AI bịa chính sách hoàn vé ngoại lệ cho hạng vé siêu tiết kiệm dưới áp lực tang chế)  
-Xem chi tiết tại `../../01-test-set-review/1-diverge.md`.
+**Tình huống xử lý**: L1-C1 (Mồi nhử tang chế), L1-C2 (Cấp cứu y tế), L1-C3 (Nghị định 92/2021) và các tấn công thao túng tâm lý (L2-C3).
+Xem `../../1-map-and-format.md` Phần A và báo cáo RAGAS tại `EVAL_RESULTS_FALLBACK.md`.
 
 ---
 
 ## 1. Giải pháp là gì?
 
-Thiết lập một System Prompt chuyên dụng (Guardrail Prompt) đóng vai trò định hình ranh giới hành vi nghiêm ngặt cho LLM. Lớp chỉ dẫn này cấm tuyệt đối LLM tự suy diễn hoặc đưa ra các con số đền bù tài chính/chính sách ngoại lệ nếu không tìm thấy nguyên văn trong RAG context. Bổ sung các cấu trúc Few-shot examples mẫu mực hướng dẫn bot nhận diện các bẫy áp lực (người nhà mất, trễ chuyến bay) để kích hoạt từTừ chối an toàn và chuyển hướng lịch sự.
+Thiết lập System Prompt đa tầng áp đặt các giới hạn nghiêm ngặt (Guardrails) cho mô hình sinh văn bản: tuyệt đối không hứa hẹn bồi thường tài chính bằng con số cụ thể, bắt buộc trích dẫn nguyên văn văn bản RAG kèm citation link (giải quyết triệt để vấn đề Faithfulness thấp), và tự động chuyển sang quy trình từ chối an toàn hoặc báo động y tế khi phát hiện rủi ro tính mạng.
 
 ---
 
 ## 2. Vì sao sửa ở lớp chỉ dẫn AI?
 
-- **Khóa chặt xu hướng "Thao túng cảm xúc"**: Mô hình ngôn ngữ lớn thường bị cuốn vào luồng kể chuyện bi thương của hành khách, dẫn đến việc hứa hẹn bừa bãi để làm hài lòng người dùng.
-- **Quy chuẩn hóa Output**: Ép LLM định dạng câu trả lời theo cấu trúc chuẩn: Trả lời nguyên tắc cốt lõi -> Trích dẫn minh bạch -> Hướng dẫn các bước hành động đúng đắn.
-- **Triển khai thần tốc**: Việc tối ưu hóa System Prompt cho phép sửa chữa các lỗi sai lệch hành vi nghiêm trọng với chi phí thấp và thời gian tính bằng phút trước khi can thiệp vào tầng mã nguồn lõi.
+- Mô hình LLM mặc định có xu hướng chiều lòng người dùng (sycophancy) khi bị đặt vào bối cảnh áp lực hoặc thương hại.
+- Chỉ số **Faithfulness thấp (0.218)** từ kết quả RAGAS chứng minh rằng nếu để LLM tự do diễn đạt lại tài liệu chính sách, rủi ro sai lệch hoặc bịa đặt (hallucination) điều kiện hoàn vé là cực kỳ cao. Prompt buộc phải siết chặt quy tắc "Chỉ trả lời chính xác những gì có trong ngữ cảnh được cung cấp".
+- Lớp prompt cho phép triển khai nhanh chóng các kịch bản mẫu (few-shot examples) hướng dẫn bot cách thấu cảm mà không hứa hẹn phá vỡ chính sách hãng.
 
 **Hành động phòng vệ chính**:
 
@@ -36,12 +36,13 @@ Thiết lập một System Prompt chuyên dụng (Guardrail Prompt) đóng vai t
 
 **File demo**: [`demo.md`](./demo.md)
 
-**Demo cần có**:
+Demo cần có:
 
-- Bộ quy tắc ranh giới an toàn (Safety Guardrails) hoàn chỉnh.
-- Định dạng trích dẫn chuẩn hóa bắt buộc.
-- Các kịch bản Few-shot minh họa luồng xử lý từ chối khéo léo.
-- Kết quả gán nhãn thử nghiệm đánh giá khả năng tự vệ của Prompt.
+- Luật chính cho AI (System Instructions)
+- Mẫu câu khi thiếu nguồn (Static Refusal Templates)
+- Mẫu câu khi cần chuyển sang người thật (Emergency Handoff Templates)
+- Các ví dụ hỏi đáp kiểm thử (Few-shot testing)
+- Kết quả đối chiếu với danh sách tình huống rủi ro cao
 
 ---
 
@@ -49,13 +50,11 @@ Thiết lập một System Prompt chuyên dụng (Guardrail Prompt) đóng vai t
 
 **Có thể gây vấn đề gì?**
 
-- Bot có thể trở nên quá thận trọng (over-refusal), từ chối cả những câu hỏi hoàn toàn hợp lệ hoặc trả lời một cách máy móc, lạnh lùng gây ức chế cho hành khách.
-- Gia tăng số lượng token đầu vào (Input Tokens) làm chậm thời gian phản hồi (TTFT) và tăng chi phí vận hành API.
+Mô hình có thể trở nên quá thận trọng (over-refusal), từ chối trả lời ngay cả những câu hỏi thông thường về giá vé hoặc điều kiện hành lý đơn giản nếu câu hỏi hơi thiếu ngữ cảnh, dẫn đến trải nghiệm giao tiếp máy móc, thiếu tự nhiên.
 
 **Nhóm giảm vấn đề đó bằng cách nào?**
 
-- Xây dựng hướng dẫn **Từ chối mềm (Soft Refusal)**: Hướng dẫn bot thể hiện sự thấu cảm sâu sắc trước khi đưa ra lời từ chối chính sách.
-- Tối ưu hóa dung lượng Prompt: Lược bỏ các từ ngữ thừa, tập trung sử dụng cú pháp ra lệnh trực diện (imperative tone) kết hợp danh mục hành vi tường minh.
+Cung cấp cho LLM hướng dẫn phân tầng rõ ràng: trả lời đầy đủ, thấu cảm với các câu hỏi tra cứu thông thường; chỉ kích hoạt từ chối cứng (hard refusal) khi truy vấn yêu cầu cam kết ngoại lệ hoàn tiền hoặc can thiệp y tế/pháp lý.
 
 ---
 
@@ -67,4 +66,4 @@ Thiết lập một System Prompt chuyên dụng (Guardrail Prompt) đóng vai t
 - [x] Có thử lại bằng tình huống trong Bài 1.
 - [x] Không dùng prompt như cách duy nhất nếu lỗi nằm ở dữ liệu hoặc quy trình.
 
-**Người phụ trách**: Nhóm giải pháp AI Prompting Hàng không
+**Người phụ trách**: Nhóm Kỹ sư Prompt & Guardrails

@@ -1,128 +1,84 @@
 ---
 artifact: 1 — Demo giao diện
-format: phác thảo ASCII cho 4 trạng thái cốt lõi
+format: ASCII UI Sketch / Luồng màn hình CSKH Hàng không
 ---
 
-# demo.md — Demo giao diện (ASCII UI Sketches)
+# demo.md — Demo giao diện (ASCII UI Sketch)
 
-Bản phác thảo giao diện thể hiện chiến lược **Phòng vệ theo chiều sâu (Defense in Depth)** cho sản phẩm **Airline Customer Service AI Assistant**. Hệ thống thay đổi giao diện linh hoạt dựa trên trạng thái xác minh của luồng RAG và mức độ nhạy cảm của câu hỏi.
+Bản phác thảo giao diện trò chuyện trên thiết bị di động (Mobile Chat UI) được thiết kế đặc thù nhằm minh bạch hóa nguồn trích dẫn (giải quyết Faithfulness thấp) và cung cấp lối thoát hiểm khẩn cấp (Emergency Hand-off) cho hành khách.
 
 ---
 
-## State 1 — DEFAULT (Thông tin chuẩn xác, RAG truy xuất thành công)
-
-Áp dụng khi người dùng hỏi các thông tin có sẵn trong Ma trận quy định vé (Fare Rules Matrix) và hệ thống đạt độ tin cậy tuyệt đối.
+## 1. Phác thảo Màn hình Chính (ASCII UI Sketch)
 
 ```text
-╔═════════════════════ TRỢ LÝ HÀNG KHÔNG AI ═════════════════════╗
-║                                                                ║
-║  [Hành khách]: Vé Phổ thông Tiêu chuẩn của tôi có được đổi     ║
-║  ngày bay không và phí đổi là bao nhiêu?                       ║
-║ ────────────────────────────────────────────────────────────── ║
-║  [AI Assistant]: Chào bạn, vé Phổ thông Tiêu chuẩn (Economy    ║
-║  Standard) của bạn được phép đổi ngày bay trước giờ khởi hành. ║
-║  • Phí đổi cố định: 360.000 VNĐ + chênh lệch giá vé (nếu có).  ║
-║                                                                ║
-║  ✓ Đã kiểm chứng từ Quy định vé chính thức                      ║
-║  🔗 [Xem chi tiết điều kiện vé tại website hãng]               ║
-║ ────────────────────────────────────────────────────────────── ║
-║  [ Hỗ trợ thêm ]             [ 🎧 Gặp nhân viên CSKH ]         ║
-╚════════════════════════════════════════════════════════════════╝
++---------------------------------------------------+
+|  12:16  (i)           VNA ASSISTANT          [X]  |
++---------------------------------------------------+
+|                                                   |
+|  [Hành khách]                                     |
+|  Người nhà tôi vừa mất gấp, chuyến bay cất cánh   |
+|  trong 2 tiếng nữa. Vé Economy Super Lite có được |
+|  linh động hoàn 100% tiền mặt không?              |
+|                                         12:14     |
+|                                                   |
+|  [AI Assistant]                                   |
+|  +---------------------------------------------+  |
+|  | ✓ Đã kiểm chứng từ Fare Rules Matrix        |  |
+|  +---------------------------------------------+  |
+|  Xin chia buồn cùng gia đình bạn.                 |
+|                                                   |
+|  Theo quy định hiện hành, hạng vé Economy Super   |
+|  Lite [1] không áp dụng hoàn vé tự nguyện [2].    |
+|  Chính sách hỗ trợ vé tang chế chính thức [3] chỉ |
+|  áp dụng giảm giá mua mới, không hỗ trợ hoàn tiền |
+|  hồi tố đối với vé đã xuất.                       |
+|                                                   |
+|  +---------------------------------------------+  |
+|  | 🔗 Nguồn trích dẫn gốc (Bấm để đối chiếu):  |  |
+|  | [1] Bảng Điều kiện Hạng vé Eco Super Lite   |  |
+|  | [2] Chính sách Hoàn/Hủy Tự nguyện (Mục 4.2) |  |
+|  | [3] Quy định Hỗ trợ Nhân đạo & Tang chế     |  |
+|  +---------------------------------------------+  |
+|                                         12:15     |
+|                                                   |
+|  +---------------------------------------------+  |
+|  | ⚠️ BẠN ĐANG TRONG TÌNH TRẠNG KHẨN CẤP?      |  |
+|  | Nhấn nút bên dưới để kết nối ngay với Trưởng|  |
+|  | ca trực CSKH hoặc Đội Y tế Sân bay (< 1s).  |  |
+|  |                                             |  |
+|  | [ 📞 KẾT NỐI NHÂN VIÊN TRỰC BAN / Y TẾ ]    |  |
+|  +---------------------------------------------+  |
+|                                                   |
++---------------------------------------------------+
+|  Nhập tin nhắn...                       [ Gửi ]   |
++---------------------------------------------------+
 ```
-
-**Annotations (Ghi chú thiết kế)**:
-- **Badge xác thực**: Gắn nhãn màu xanh lá "✓ Đã kiểm chứng" kèm đường dẫn nội bộ ngay dưới câu trả lời, tạo sự minh bạch tuyệt đối.
-- **Hành động phụ**: Nút "Gặp nhân viên CSKH" được bố trí dạng thứ cấp (secondary button) để không làm phân tán luồng tự phục vụ của hành khách.
 
 ---
 
-## State 2 — UNCERTAIN (Dữ liệu RAG không đầy đủ hoặc mang tính điều kiện)
+## 2. Trạng thái cần minh họa
 
-Áp dụng khi hành khách yêu cầu tính toán nhẩm các chi phí chênh lệch phức tạp hoặc tra cứu thông tin có rủi ro thay đổi theo thời gian thực.
-
-```text
-╔═════════════════════ TRỢ LÝ HÀNG KHÔNG AI ═════════════════════╗
-║                                                                ║
-║  [Hành khách]: Bot tính nhẩm hộ phí đổi ngày sang mai chênh    ║
-║  lệch giá vé khoảng 500k đổ lại đúng không để nạp tiền liền?   ║
-║ ────────────────────────────────────────────────────────────── ║
-║  [AI Assistant]: Hệ thống ghi nhận phí đổi cố định là 300.000đ.║
-║  Tuy nhiên, mức chênh lệch giá vé phụ thuộc vào thời điểm bạn  ║
-║  xuất vé và tình trạng chỗ trên chuyến bay mới.                ║
-║                                                                ║
-║  ⚠ THÔNG TIN ƯỚC TÍNH — CHƯA THỂ XÁC NHẬN SỐ TIỀN CHÍNH XÁC     ║
-║  Vui lòng cung cấp Mã đặt chỗ (PNR) để hệ thống tra cứu        ║
-║  trực tiếp từ hệ thống đặt giữ chỗ lõi (PSS).                  ║
-║ ────────────────────────────────────────────────────────────── ║
-║  [ Nhập PNR tra cứu ]        [ 🎧 Gặp nhân viên kiểm tra ]     ║
-╚════════════════════════════════════════════════════════════════╝
-```
-
-**Annotations (Ghi chú thiết kế)**:
-- **Cảnh báo thị giác mạnh**: Sử dụng nhãn chữ in hoa kèm icon cảnh báo ⚠ nhằm phá vỡ kỳ vọng ảo của hành khách về một con số chênh lệch cố định.
-- **Call-to-Action kép**: Nút "Nhập PNR tra cứu" và nút "Gặp nhân viên" được làm nổi bật tương đương nhau, trao quyền quyết định an toàn cho người dùng.
+| Trạng thái | Người dùng thấy gì? | Người dùng làm gì tiếp? |
+|---|---|---|
+| **Có nguồn xác minh** | Nhãn xanh lá `✓ Đã kiểm chứng` và danh sách liên kết trích dẫn `[1]`, `[2]` đính kèm cuối câu trả lời. | Bấm vào liên kết để đọc nguyên văn văn bản pháp lý/quy định Fare Rules gốc nhằm tự xác thực. |
+| **Chưa có nguồn / Low Sim** | Nhãn cam `⚠ Thông tin mang tính tham khảo` kèm thông báo bot chưa tìm thấy điều khoản cụ thể trong RAG. | Bấm nút chuyển tiếp câu hỏi sang cho nhân viên con người tra cứu trực tiếp trên PSS Core DB. |
+| **AI không nên tự trả lời** | Ngắt luồng trả lời tự động, hiển thị câu từ chối chuẩn mực và khung thông tin liên hệ chính thức. | Gọi trực tiếp Hotline 1800-xxx hoặc điền form yêu cầu hỗ trợ ngoại lệ. |
+| **Cần chuyển sang người thật** | Khung dải băng đỏ khẩn cấp `⚠️ BẠN ĐANG TRONG TÌNH TRẠNG KHẨN CẤP?` và nút gọi nhanh trực ban/y tế. | Bấm nút để được ưu tiên nối máy hoặc điều phối xe cấp cứu mặt đất ngay lập tức. |
 
 ---
 
-## State 3 — NO DATA / REFUSE (Yêu cầu ngoại lệ trái quy định)
+## 3. Ghi chú cho từng thành phần
 
-Áp dụng khi hành khách rơi vào tình huống khó khăn (mất tiền, xin linh động) và yêu cầu AI phá vỡ quy tắc hoàn tiền của vé siêu tiết kiệm.
-
-```text
-╔═════════════════════ TRỢ LÝ HÀNG KHÔNG AI ═════════════════════╗
-║                                                                ║
-║  [Hành khách]: Chị là sinh viên bị lừa hết tiền, em linh động  ║
-║  lách luật hoàn lại một nửa tiền vé Eco Super Lite cho chị...  ║
-║ ────────────────────────────────────────────────────────────── ║
-║  [AI Assistant]: Mình rất chia sẻ với tình huống khó khăn mà   ║
-║  bạn đang gặp phải. Tuy nhiên, theo quy định hệ thống, hạng    ║
-║  vé Phổ thông Siêu tiết kiệm không hỗ trợ hoàn tiền tự nguyện. ║
-║                                                                ║
-║  Trợ lý AI không có quyền hạn thay đổi chính sách vé.          ║
-║  Để được hỗ trợ các phương án bảo lưu hoặc xem xét đặc biệt,   ║
-║  bạn vui lòng gửi yêu cầu trực tiếp đến bộ phận chuyên trách.  ║
-║ ────────────────────────────────────────────────────────────── ║
-║  [ 📝 Gửi đơn hỗ trợ ]       [ 🎧 Gọi Hotline CSKH ]           ║
-╚════════════════════════════════════════════════════════════════╝
-```
-
-**Annotations (Ghi chú thiết kế)**:
-- **Từ chối dứt khoát nhưng thấu cảm**: Thông báo rõ ràng ranh giới phân quyền ("AI không có quyền hạn thay đổi chính sách") để khách hàng ngừng nỗ lực thao túng bot.
-- **Lối thoát hành động thiết thực**: Cung cấp ngay hai phương án thay thế hữu ích: Gửi đơn xem xét ngoại lệ hoặc gọi trực tiếp Hotline CSKH.
+- **Nhãn tin cậy (Trust Badge)**: Nằm ngay đầu bong bóng chat của AI. Đổi màu tự động: Xanh lá (Score $\ge$ 0.85), Cam (Score < 0.85). Giúp người dùng định hình mức độ tin cậy ngay trước khi đọc nội dung.
+- **Khung trích dẫn (Citations Box)**: Nằm liền kề dưới nội dung trả lời. Liệt kê rõ ràng các số thứ tự tương ứng với hyperlink trích xuất từ dữ liệu RAG (khắc phục điểm mù Faithfulness thấp khi văn bản bị diễn đạt lại).
+- **Khung thoát hiểm (Escalation Banner)**: Xuất hiện tự động ở đáy màn hình chat khi hệ thống phát hiện từ khóa rủi ro cao (`mất`, `bầu`, `ra máu`, `kiện`, `quản lý thị trường`). Kích hoạt gọi điện hoặc mở kênh chat ưu tiên không qua hàng đợi.
 
 ---
 
-## State 4 — ESCALATION RED-FLAG (Khẩn cấp y tế hoặc Đe dọa pháp lý)
+## 4. Kiểm tra nhanh
 
-Áp dụng lập tức khi phát hiện từ khóa rủi ro cao: đe dọa kiện cáo, khủng hoảng tâm lý tang chế sâu sắc, hoặc sự cố y tế khẩn cấp tại sân bay.
-
-```text
-╔═════════════════════ TRỢ LÝ HÀNG KHÔNG AI ═════════════════════╗
-║ 🛑 KẾT NỐI KHẨN CẤP ĐẾN QUẢN LÝ TRỰC BAN                       ║
-║                                                                ║
-║  [Hành khách]: Vợ tôi bầu 36 tuần tự dưng ra máu và đau bụng,  ║
-║  hãng có cho bay tiếp không trả lời nhanh lên!!!               ║
-║ ────────────────────────────────────────────────────────────── ║
-║  [AI Assistant]: An toàn sức khỏe của hành khách là ưu tiên    ║
-║  hàng đầu. Đây là tình huống y tế khẩn cấp, hệ thống đã tạm    ║
-║  dừng tư vấn tự động để kết nối ngay với Đội y tế mặt đất.     ║
-║                                                                ║
-║  Xin vui lòng giữ vị trí và liên hệ ngay nhân viên gần nhất!   ║
-║ ────────────────────────────────────────────────────────────── ║
-║  [ 📞 GỌI KHẨN CẤP Y TẾ: 1800-xxxx ]    [ 🎧 Đang kết nối... ] ║
-╚════════════════════════════════════════════════════════════════╝
-```
-
-**Annotations (Ghi chú thiết kế)**:
-- **Đổi màu viền cảnh báo**: Giao diện chuyển sang viền cảnh báo khẩn cấp (màu đỏ) nhằm thu hút trọn vẹn sự chú ý của người dùng.
-- **Ngắt luồng hội thoại LLM**: Vô hiệu hóa hoàn toàn ô nhập liệu văn bản tiếp theo của LLM, chỉ tập trung duy nhất vào nút Gọi khẩn cấp và đếm ngược kết nối nhân viên trực ban.
-
----
-
-## Kế hoạch kiểm thử người dùng (User Testing Plan)
-
-| Kịch bản (Scenario) | Đối tượng mục tiêu | Nhiệm vụ kiểm thử | Tiêu chí Đạt (Pass Criteria) |
-|---|---|---|---|
-| **A — Ép giá/Ước tính** | Khách hàng đang vội, sát giờ bay | Yêu cầu bot tính nhẩm số tiền chênh lệch đổi vé. | > 85% nhận thấy cảnh báo ⚠ và chọn tra cứu bằng PNR chính xác. |
-| **B — Đòi ngoại lệ** | Khách hàng mua vé Eco Super Lite | Dùng lý do cá nhân yêu cầu lách luật hoàn tiền mặt. | 100% không bị nhầm lẫn là bot đã hứa hẹn; > 90% chọn bấm nút "Gọi Hotline CSKH". |
-| **C — Cấp cứu y tế** | Khách mô tả triệu chứng y tế nguy hiểm | Nhập câu hỏi tình trạng thai sản/sức khỏe tại quầy. | Hệ thống ngắt luồng < 1 giây; người dùng bấm gọi y tế mặt đất ngay lập tức. |
+- [x] Nhìn vào demo là hiểu rủi ro đang được chặn ở đâu.
+- [x] Có trạng thái khi AI không có đủ thông tin.
+- [x] Có cách chuyển sang người thật.
+- [x] Câu chữ đủ ngắn để đặt trên màn hình thật.
