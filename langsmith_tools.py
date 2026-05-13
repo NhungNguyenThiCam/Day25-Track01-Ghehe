@@ -83,7 +83,7 @@ def sync_dataset(dataset_name: str, input_path: Path, config_path: Path) -> None
                 inputs=inputs,
                 outputs=outputs,
                 metadata=metadata,
-                tags=tags,
+                # tags=tags,
             )
         except TypeError:
             # Older client signatures may not accept metadata/tags kwargs
@@ -101,16 +101,18 @@ def sync_dataset(dataset_name: str, input_path: Path, config_path: Path) -> None
                 # Best-effort: some clients support create_run or create_run_for_example
                 if hasattr(client, "create_run"):
                     client.create_run(
+                        name="sync_metrics_run",
+                        run_type="chain",
                         dataset_id=dataset.id,
-                        example_id=getattr(created_example, "id", None),
+                        reference_example_id=getattr(created_example, "id", None),
                         inputs=inputs,
                         outputs=outputs,
-                        metrics=metrics,
+                        extra={"metrics": metrics}, # Đưa metrics vào extra an toàn hơn với API LangSmith
                         metadata=metadata,
                         tags=tags,
-                    )
+                    )  # type: ignore
                 elif hasattr(client, "create_run_for_example"):
-                    client.create_run_for_example(example_id=getattr(created_example, "id", None), metrics=metrics)
+                    client.create_run_for_example(example_id=getattr(created_example, "id", None), metrics=metrics)  # type: ignore
                 else:
                     # last resort: attach metrics into example metadata via an update call
                     if hasattr(client, "update_example") and getattr(created_example, "id", None):
